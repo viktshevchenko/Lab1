@@ -15,7 +15,7 @@ char* Decrypt(const char* szSource, const char* szPassWord);
 
 
 class encoder {
-    unsigned char const* _key;
+     unsigned char const* _key;
     int _len;
 public:
     encoder(unsigned char const* key, int len);
@@ -48,32 +48,47 @@ encoder::encoder(const encoder &p) {
 
 encoder::~encoder() {
     delete [] _key;
-    //TODO: close files;
 }
 
 void encoder::encode(const char *input_file, const char *output_file, bool flag) {
     if(flag == 1) {
-        //TODO Enscrypt
         std::ifstream fin;
+        std::ofstream fout;
         fin.open(input_file);
-        if(!fin.is_open()){
+        fout.open(output_file);
+        if(!fin.is_open() || !fout.is_open()){
             std::cout << "Error opening file" << std::endl;
             exit(1);
         }
-        std::basic_ifstream<char> line;
+        const char* line = nullptr;
         char* result = nullptr;
         while (std::getline(fin, line)){
             result = Encrypt(line, _key);
+            fout << result;
         }
         fin.close();
+        fout.close();
     }
     else if(flag == 0) {
-        //TODO Descrypt
-        std::ifstream fout(output_file);
+        std::ofstream fin;
+        std::ifstream fout;
+        fin.open(input_file);
+        fout.open(output_file);
+        if(!fin.is_open() || !fout.is_open()){
+            std::cout << "Error opening file" << std::endl;
+            exit(1);
+        }
+        const char* line = nullptr;
+        char* result = nullptr;
+        while (std::getline(fout, line)){
+            result = Decrypt(line, _key);
+            fin << result;
+        }
+        fin.close();
         fout.close();
     }
     else {
-
+        std::cout << "There is no flag like that" << std::endl;
     }
 }
 
