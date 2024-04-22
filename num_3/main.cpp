@@ -1,22 +1,31 @@
 #include <iostream>
 #include <cmath>
 
+#define expression atan(_real / _imaginary) * 180.0 / M_PI
+
 class complex_num {
     double _real, _imaginary;
 public:
-    complex_num(double real = 0, double imaginary = 0) { _real = real; _imaginary = imaginary; }
-
+    explicit complex_num(double real = 0, double imaginary = 0);
+    complex_num(complex_num const &other) = default;
+    ~complex_num() = default;
     complex_num & operator=(complex_num ob2);
     complex_num operator+(complex_num ob2) const;
     complex_num operator-(complex_num ob2) const;
     complex_num operator*(complex_num ob2) const;
     complex_num operator/(complex_num ob2) const;
 
-    double module() { return sqrt(pow(_real, 2) + pow(_imaginary, 2)); }
+    double module() const;
     double argument() const;
-    void show(int num);
-    void show();
+
+    double get_r() const;
+    double get_im() const;
 };
+
+complex_num::complex_num(double real, double imaginary) {
+    _real = real;
+    _imaginary = imaginary;
+}
 
 complex_num & complex_num::operator=(complex_num ob2) {
     if(this != &ob2) {
@@ -58,26 +67,38 @@ complex_num complex_num::operator/(complex_num ob2) const {
     return numerator;
 }
 
+double complex_num::module() const {
+    return _real * _real + _imaginary * _imaginary;
+}
+
 double complex_num::argument() const {
     if(_real < 0 && _imaginary > 0)
-        return 180.0 + atan(_real / _imaginary) * 180.0 / M_PI;
+        return 180.0 + expression;
 
     else if(_real < 0 && _imaginary < 0)
-        return -180.0 + atan(_real / _imaginary) * 180.0 / M_PI;
+        return -180.0 + expression;
 
-    return atan(_real / _imaginary) * 180.0 / M_PI;
+    return expression;
 }
 
-void complex_num::show(int num) {
-    std::cout << "z" << num << " = " << _real;
-    (_imaginary > 0)?(printf(" + ")):(printf(" - "));
-    std::cout << abs(_imaginary) << "i" << std::endl;
+double complex_num::get_r() const {
+    return _real;
 }
 
-void complex_num::show() {
-    std::cout << "z = " << _real;
-    (_imaginary > 0)?(printf(" + ")):(printf(" - "));
-    std::cout << abs(_imaginary) << "i" << std::endl;
+double complex_num::get_im() const {
+    return _imaginary;
+}
+
+void show(int num, complex_num ob) {
+    std::cout << "z" << num << " = " << ob.get_r();
+    (ob.get_im() > 0)?(printf(" + ")):(printf(" - "));
+    std::cout << std::abs(ob.get_im()) << "i" << std::endl;
+}
+
+void show(complex_num ob) {
+    std::cout << "z = " << ob.get_r();
+    (ob.get_im() > 0)?(printf(" + ")):(printf(" - "));
+    std::cout << std::abs(ob.get_im()) << "i" << std::endl;
 }
 
 // all functions doing with logic http://www.mathprofi.ru/kompleksnye_chisla_dlya_chainikov.html
@@ -86,32 +107,32 @@ int main() {
     complex_num n1(1, 3), n2(4, -5), n3, n4(1, -1), n5(3, 6),
         n6(13, 1), n7(7, -6), n8(5, 2);
 
-    n1.show(1);
-    n2.show(2);
+    show(1, n1);
+    show(2, n2);
     n3 = n1 + n2;
     std::cout << "z1 + z2 = ";
-    n3.show();
+    show(n3);
 
     n3 = n1 - n2;
     std::cout << "z1 - z2 = ";
-    n3.show();
+    show(n3);
 
     std::cout << "---------------------" << std::endl;
-    n4.show(1);
-    n5.show(2);
+    show(1, n4);
+    show(2, n5);
     n3 = n4 * n5;
     std::cout << "z1 * z2 = ";
-    n3.show();
+    show(n3);
 
     std::cout << "---------------------" << std::endl;
-    n6.show(1);
-    n7.show(2);
+    show(1, n6);
+    show(2, n7);
     n3 = n6 / n7;
     std::cout << "z1 / z2 = ";
-    n3.show();
+    show(n3);
 
     std::cout << "---------------------" << std::endl;
-    n8.show();
+    show(n8);
     double a = n8.module();
     std::cout << "|z|= " << a << std::endl;
     a = n8.argument();
