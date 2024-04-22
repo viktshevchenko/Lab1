@@ -9,20 +9,21 @@ class matrix {
 
 public:
     matrix(size_t size, unsigned int args, ...);
-    matrix() { element = nullptr; _size = 0; }
+    matrix();
     matrix(matrix const &ob);
     ~matrix();
     matrix & operator=(matrix const &ob2);
     matrix operator*(matrix const ob2);
-    friend matrix operator*(matrix ob, double num);
-    friend matrix operator*(double num, matrix ob);
+    friend matrix operator*(const matrix& ob, double num);
+    friend matrix operator*(double num, const matrix& ob);
     matrix operator+(matrix const ob2);
     matrix operator-(matrix const ob2);
     double determinant();
     void transponir();
-    void inverse(matrix &result);
-    void obr(matrix &newMat);
-    void show();
+    void inverse(matrix &newMat);
+    size_t get_size() const;
+    double** get_element();
+    void clear();
 
     class Proxy {
         double* _array;
@@ -58,6 +59,11 @@ matrix::matrix(size_t size, unsigned int args, ...) {
     va_end(va);
 }
 
+matrix::matrix() {
+    element = nullptr;
+    _size = 0;
+}
+
 matrix::matrix(matrix const &ob) {
     _size = ob._size;
     element = new double *[_size];
@@ -70,13 +76,12 @@ matrix::matrix(matrix const &ob) {
 }
 
 matrix::~matrix() {
-    for(size_t i = 0; i < _size; i++) delete[] element[i];
-    delete[] element;
+    clear();
 }
 
 matrix & matrix::operator=(matrix const &ob2) {
     if(&ob2 != this) {
-        this->~matrix();
+        clear();
         _size = ob2._size;
         element = new double *[_size];
         for(size_t i = 0; i < _size; i++) {
@@ -124,7 +129,7 @@ matrix matrix::operator*(matrix const ob2) {
     return temp;
 }
 
-matrix operator*(matrix ob, double num) {
+matrix operator*(const matrix& ob, double num) {
     matrix temp = ob;
     for(size_t i = 0; i < ob._size; i++) {
         for(size_t j = 0; j < ob._size; j++) {
@@ -134,14 +139,8 @@ matrix operator*(matrix ob, double num) {
     return temp;
 }
 
-matrix operator*(double num, matrix ob) {
-    matrix temp = ob;
-    for(size_t i = 0; i < ob._size; i++) {
-        for(size_t j = 0; j < ob._size; j++) {
-            temp.element[i][j] *= num;
-        }
-    }
-    return temp;
+matrix operator*(double num, const matrix& ob) {
+    return ob * num;
 }
 
 double matrix::determinant() {
@@ -228,15 +227,27 @@ void matrix::inverse(matrix &newMat){
     }
 }
 
+size_t matrix::get_size() const {
+    return _size;
+}
 
-void matrix::show() {
-    for(size_t i = 0; i < _size; i++) {
-        for(size_t j = 0; j < _size; j++) {
-            std::cout << std::showpoint << std::left << std::setw(10) << element[i][j] << ' ';
+double** matrix::get_element() {
+    return element;
+}
+
+void show(matrix ob) {
+    for(size_t i = 0; i < ob.get_size(); i++) {
+        for(size_t j = 0; j < ob.get_size(); j++) {
+            std::cout << std::showpoint << std::left << std::setw(10) << ob.get_element()[i][j] << ' ';
         }
         std::cout << std::endl;
     }
     printf("\n\n");
+}
+
+void matrix::clear() {
+    for(size_t i = 0; i < _size; i++) delete[] element[i];
+    delete[] element;
 }
 
 int main() {
@@ -245,27 +256,27 @@ int main() {
     m6(2, 4, 1, 2, 3, 4);
 
     m3 = m1 + m2;
-    m3.show();
+    show(m3);
 
     m3 = m1 - m2;
-    m3.show();
+    show(m3);
 
     m3 = m1 * 2;
-    m3.show();
+    show(m3);
 
     m3 = 5 * m1;
-    m3.show();
+    show(m3);
 
     m3 = m1 * m4;
-    m3.show();
+    show(m3);
 
     std::cout << m5.determinant() << std::endl << std::endl;
 
     m1.transponir();
-    m1.show();
+    show(m1);
 
     m5.inverse(m3);
-    m3.show();
+    show(m3);
 
     std::cout << m1[0][2] << std::endl;
 
