@@ -7,7 +7,6 @@ class queue {
         int len;
         size_t priority;
     };
-
     Node* _q;
     size_t _physical_size, _virtual_size;
 
@@ -24,9 +23,12 @@ public:
     queue & operator=(queue const &ob2);
     void push(char const *str, int priority);
     void pop();
-    void search_min() { std::cout << "Minimal priority: " << _q[0].str << std::endl; }
+    void search_min();
     void merging(queue const &q1, queue const &q2);
-    void show();
+    size_t get_phys() const;
+    size_t get_virt() const;
+    Node* get_q();
+    void clear();
 };
 
 queue::queue() {
@@ -35,11 +37,15 @@ queue::queue() {
     _virtual_size = 0;
 }
 
-queue::~queue() {
+void queue::clear() {
     for(size_t i = 0; i < _virtual_size; i++) {
         delete[] _q[i].str;
     }
     delete[] _q;
+}
+
+queue::~queue() {
+    clear();
 }
 
 queue::queue(queue const &ob2) {
@@ -55,12 +61,7 @@ queue::queue(queue const &ob2) {
 
 queue & queue::operator=(queue const &ob2) {
     if(this != &ob2) {
-        //this->~queue();
-        for(size_t i = 0; i < _virtual_size; i++) {
-            delete[] _q[i].str;
-        }
-        delete[] _q;
-
+        clear();
         _physical_size = ob2._physical_size;
         _q = new Node[_physical_size];
         _virtual_size = ob2._virtual_size;
@@ -108,28 +109,35 @@ void queue::pop() {
     }
 }
 
-void queue::merging(queue const &q1, queue const &q2){
-    if(q1._virtual_size > q2._virtual_size) {
-        for(size_t i = 0; i < q1._virtual_size; i++) {
-            push(q1._q[i].str, q1._q->priority);
-            if(i < q2._virtual_size)
-                push(q2._q[i].str, q2._q->priority);
-        }
-    }
-    else {
-        for(size_t i = 0; i < q2._virtual_size; i++) {
+void queue::search_min() {
+    std::cout << "Minimal priority: " << _q[0].str << std::endl;
+}
+
+void queue::merging(queue const &q1, queue const &q2) {
+    for(size_t i = 0; i < q1._virtual_size; i++) {
+        push(q1._q[i].str, q1._q->priority);
+        if(i < q2._virtual_size)
             push(q2._q[i].str, q2._q->priority);
-            if(i < q1._virtual_size)
-                push(q1._q[i].str, q1._q->priority);
-        }
     }
 }
 
-void queue::show() {
-    std::cout << "Virtual size: " << _virtual_size << std::endl;
-    std::cout << "Physical size: " << _physical_size << std::endl;
-    for(size_t i = 0; i < _virtual_size; i++)
-        std::cout << i << ' ' << _q[i].str << std::endl;
+size_t queue::get_phys() const {
+    return _physical_size;
+}
+
+size_t queue::get_virt() const {
+    return _virtual_size;
+}
+
+queue::Node* queue::get_q() {
+    return _q;
+}
+
+void show(queue ob) {
+    std::cout << "Virtual size: " << ob.get_virt() << std::endl;
+    std::cout << "Physical size: " << ob.get_phys() << std::endl;
+    for(size_t i = 0; i < ob.get_virt(); i++)
+        std::cout << i << ' ' << ob.get_q()[i].str << std::endl;
     std::cout << std::endl;
 }
 
@@ -138,14 +146,14 @@ int main() {
 
     for(size_t i = 0; i < 5; i++)
         q1.push("1", 1);
-    q1.show();
+    show(q1);
 
     for(size_t i = 0; i < 12; i++)
         q2.push("2", 2);
-    q2.show();
+    show(q2);
 
     q3.merging(q1, q2);
-    q3.show();
+    show(q3);
 
     for(int i = 0; i < 7; i++)
         q3.pop();
@@ -153,7 +161,7 @@ int main() {
     q3.search_min();
 
     q5 = q3;
-    q5.show();
+    show(q5);
 
     return 0;
 }
